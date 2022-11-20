@@ -1,11 +1,16 @@
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -29,6 +34,7 @@ public class FractalExplorer {
     private static final String RESET_BUTTON_TEXT = "Reset";
     private static final String SAVE_BUTTON_TEXT = "Save image";
     private static final String CHOOSE_FRACTAL_LABEL_TEXT = "Fractal:";
+    private static final String SAVE_ERROR_MESSAGE = "Save image error: ";
 
     private JFrame frame;
     private JButton resetButton;
@@ -36,6 +42,7 @@ public class FractalExplorer {
     private JImageDisplay image;
     private JComboBox chooseFractal;
     private JLabel chooseFractalLabel;
+    private JFileChooser fileChooser;
 
     private int screenSize;
     private FractalGenerator fractalGenerator;
@@ -52,6 +59,10 @@ public class FractalExplorer {
 
         frame = new JFrame(SCREEN_TITLE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("PNG Images", "png"));
+        fileChooser.setAcceptAllFileFilterUsed(false);
 
         image = new JImageDisplay(screenSize, screenSize);
         image.addMouseListener(new MouseInputListener() {
@@ -118,6 +129,25 @@ public class FractalExplorer {
         });
 
         saveButton = new JButton(SAVE_BUTTON_TEXT);
+        saveButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(frame)) {
+
+                    try {
+                        ImageIO.write(image.getBufferedImage(), "png", fileChooser.getSelectedFile());
+
+                    } catch (Exception exception) {
+
+                        JOptionPane.showMessageDialog(frame, SAVE_ERROR_MESSAGE + exception.getMessage(), SCREEN_TITLE,
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+        });
 
         chooseFractal = new JComboBox();
         chooseFractal.addItem(new Mandelbrot());
