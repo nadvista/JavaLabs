@@ -47,7 +47,6 @@ public class FractalExplorer {
 
         resetButton = new JButton();
         resetButton.setText(RESET_BUTTON_TEXT);
-        resetButton.setAction(null);
         resetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
