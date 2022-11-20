@@ -30,4 +30,9 @@ public class Tricorn extends FractalGenerator {
 
         return -1;
     }
+
+    @Override
+    public String toString() {
+        return "Tricorn";
+    }
 }
