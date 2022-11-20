@@ -44,22 +44,7 @@ public class FractalExplorer {
         frame = new JFrame();
 
         image = new JImageDisplay(screenSize, screenSize);
-
-        resetButton = new JButton();
-        resetButton.setText(RESET_BUTTON_TEXT);
-        resetButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fractalGenerator.getInitialRange(currentFractalRect);
-                drawFractal();
-            }
-        });
-
-        frame.add(image, BorderLayout.CENTER);
-        frame.add(resetButton, BorderLayout.SOUTH);
-        frame.setTitle(SCREEN_TITLE);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.addMouseListener(new MouseInputListener() {
+        image.addMouseListener(new MouseInputListener() {
 
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -112,6 +97,21 @@ public class FractalExplorer {
             }
 
         });
+
+        resetButton = new JButton();
+        resetButton.setText(RESET_BUTTON_TEXT);
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fractalGenerator.getInitialRange(currentFractalRect);
+                drawFractal();
+            }
+        });
+
+        frame.add(image, BorderLayout.CENTER);
+        frame.add(resetButton, BorderLayout.SOUTH);
+        frame.setTitle(SCREEN_TITLE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.pack();
         frame.setVisible(true);
