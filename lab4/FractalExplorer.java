@@ -1,8 +1,16 @@
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -22,12 +30,20 @@ public class FractalExplorer {
     }
 
     private static final double CLICK_NEW_SCALE = 0.5d;
-    private static final String SCREEN_TITLE = "Множество мандельброта";
-    private static final String RESET_BUTTON_TEXT = "Сброс";
+    private static final String SCREEN_TITLE = "Fractal explorer";
+    private static final String RESET_BUTTON_TEXT = "Reset";
+    private static final String SAVE_BUTTON_TEXT = "Save image";
+    private static final String CHOOSE_FRACTAL_LABEL_TEXT = "Fractal:";
+    private static final String SAVE_ERROR_MESSAGE = "Save image error: ";
 
     private JFrame frame;
     private JButton resetButton;
+    private JButton saveButton;
     private JImageDisplay image;
+    private JComboBox chooseFractal;
+    private JLabel chooseFractalLabel;
+    private JFileChooser fileChooser;
+
     private int screenSize;
     private FractalGenerator fractalGenerator;
     private Rectangle2D.Double currentFractalRect;
@@ -41,7 +57,12 @@ public class FractalExplorer {
 
     public void createAndShowGUI() {
 
-        frame = new JFrame();
+        frame = new JFrame(SCREEN_TITLE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("PNG Images", "png"));
+        fileChooser.setAcceptAllFileFilterUsed(false);
 
         image = new JImageDisplay(screenSize, screenSize);
         image.addMouseListener(new MouseInputListener() {
@@ -108,10 +129,57 @@ public class FractalExplorer {
             }
         });
 
-        frame.add(image, BorderLayout.CENTER);
-        frame.add(resetButton, BorderLayout.SOUTH);
-        frame.setTitle(SCREEN_TITLE);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        saveButton = new JButton(SAVE_BUTTON_TEXT);
+        saveButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(frame)) {
+
+                    try {
+                        ImageIO.write(image.getBufferedImage(), "png", fileChooser.getSelectedFile());
+
+                    } catch (Exception exception) {
+
+                        JOptionPane.showMessageDialog(frame, SAVE_ERROR_MESSAGE + exception.getMessage(), SCREEN_TITLE,
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+        });
+
+        chooseFractal = new JComboBox();
+        chooseFractal.addItem(new Mandelbrot());
+        chooseFractal.addItem(new Tricorn());
+        chooseFractal.addItem(new BurningShip());
+        chooseFractal.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fractalGenerator = (FractalGenerator) chooseFractal.getSelectedItem();
+                fractalGenerator.getInitialRange(currentFractalRect);
+                drawFractal();
+            }
+        });
+
+        chooseFractalLabel = new JLabel(CHOOSE_FRACTAL_LABEL_TEXT);
+
+        var northPanel = new JPanel();
+        northPanel.add(chooseFractalLabel);
+        northPanel.add(chooseFractal);
+
+        var centerPanel = new JPanel();
+        centerPanel.add(image);
+
+        var southPanel = new JPanel();
+        southPanel.add(saveButton);
+        southPanel.add(resetButton);
+
+        frame.setLayout(new BorderLayout());
+        frame.add(northPanel, BorderLayout.NORTH);
+        frame.add(centerPanel, BorderLayout.CENTER);
+        frame.add(southPanel, BorderLayout.SOUTH);
 
         frame.pack();
         frame.setVisible(true);

@@ -1,6 +1,6 @@
 import java.awt.geom.Rectangle2D.Double;
 
-public class Mandelbrot extends FractalGenerator {
+public class Tricorn extends FractalGenerator {
 
     private static final double INITIAL_SIZE = 3;
     private static final double INITIAL_X = -2;
@@ -23,6 +23,7 @@ public class Mandelbrot extends FractalGenerator {
 
             if (z0.ModulePow2() >= 4)
                 return iteration;
+            z0.setY(-z0.getY());
             z0.InSquare();
             z0.Add(c);
         }
@@ -32,6 +33,6 @@ public class Mandelbrot extends FractalGenerator {
 
     @Override
     public String toString() {
-        return "Mandelbrot";
+        return "Tricorn";
     }
 }

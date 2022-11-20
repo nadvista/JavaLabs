@@ -21,11 +21,14 @@ class JImageDisplay extends javax.swing.JComponent {
         image.setRGB(x, y, rgbColor);
     }
 
+    public java.awt.image.BufferedImage getBufferedImage() {
+        return image;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
 
         super.paintComponent(g);
         g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-
     }
 }

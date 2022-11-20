@@ -1,10 +1,10 @@
 import java.awt.geom.Rectangle2D.Double;
 
-public class Mandelbrot extends FractalGenerator {
+public class BurningShip extends FractalGenerator {
 
-    private static final double INITIAL_SIZE = 3;
+    private static final double INITIAL_SIZE = 4;
     private static final double INITIAL_X = -2;
-    private static final double INITIAL_Y = -1.5d;
+    private static final double INITIAL_Y = -2.5d;
     private static final int MAX_ITERATIONS = 2000;
 
     @Override
@@ -23,6 +23,9 @@ public class Mandelbrot extends FractalGenerator {
 
             if (z0.ModulePow2() >= 4)
                 return iteration;
+
+            z0.setX(Math.abs(z0.getX()));
+            z0.setY(Math.abs(z0.getY()));
             z0.InSquare();
             z0.Add(c);
         }
@@ -32,6 +35,6 @@ public class Mandelbrot extends FractalGenerator {
 
     @Override
     public String toString() {
-        return "Mandelbrot";
+        return "BurningShip";
     }
 }
