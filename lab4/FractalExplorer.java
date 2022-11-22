@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -20,13 +21,12 @@ import java.awt.*;
 
 public class FractalExplorer {
 
-    private static final int SCREEN_SIZE = 300;
+    private static final int SCREEN_SIZE = 800;
 
     public static void main(String[] args) {
 
         var fractalExplorer = new FractalExplorer(SCREEN_SIZE);
         fractalExplorer.createAndShowGUI();
-        fractalExplorer.drawFractal();
     }
 
     private static final double CLICK_NEW_SCALE = 0.5d;
@@ -48,11 +48,19 @@ public class FractalExplorer {
     private FractalGenerator fractalGenerator;
     private Rectangle2D.Double currentFractalRect;
 
+    private int rowsRemaining = 0;
+
     public FractalExplorer(int ScreenSize) {
         screenSize = ScreenSize;
         currentFractalRect = new Rectangle2D.Double();
         fractalGenerator = new Mandelbrot();
         fractalGenerator.getInitialRange(currentFractalRect);
+    }
+
+    public void enableUI(Boolean state) {
+        saveButton.setEnabled(state);
+        chooseFractal.setEnabled(state);
+        resetButton.setEnabled(state);
     }
 
     public void createAndShowGUI() {
@@ -69,7 +77,8 @@ public class FractalExplorer {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-
+                if (rowsRemaining != 0)
+                    return;
                 var xCoord = FractalGenerator.getCoord(
                         currentFractalRect.x,
                         currentFractalRect.x + currentFractalRect.width,
@@ -184,11 +193,30 @@ public class FractalExplorer {
         frame.pack();
         frame.setVisible(true);
         frame.setResizable(false);
+        drawFractal();
     }
 
     private void drawFractal() {
-        for (int x = 0; x < screenSize; x++) {
-            for (int y = 0; y < screenSize; y++) {
+        rowsRemaining = screenSize;
+        enableUI(false);
+        for (int y = 0; y < screenSize; y++) {
+            new FractalWorker(y).execute();
+        }
+    }
+
+    class FractalWorker extends SwingWorker<Object, Object> {
+
+        private int lineY;
+        private int[] lineColors;
+
+        public FractalWorker(int lineY) {
+            this.lineY = lineY;
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            lineColors = new int[screenSize];
+            for (int x = 0; x < screenSize; x++) {
 
                 var xCoord = FractalGenerator.getCoord(
                         currentFractalRect.x,
@@ -197,15 +225,25 @@ public class FractalExplorer {
                 var yCoord = FractalGenerator.getCoord(
                         currentFractalRect.y,
                         currentFractalRect.y + currentFractalRect.width,
-                        screenSize, y);
+                        screenSize, lineY);
                 var iterations = fractalGenerator.numIterations(xCoord, yCoord);
 
                 var color = iterations == -1 ? 0
                         : Color.HSBtoRGB(0.7f + (float) iterations / 200f, 1f, 1f);
-                image.drawPixel(x, y, color);
+                lineColors[x] = color;
             }
+            return null;
         }
 
-        image.repaint();
+        @Override
+        protected void done() {
+            for (int x = 0; x < screenSize; x++) {
+                image.drawPixel(x, lineY, lineColors[x]);
+            }
+            image.repaint(0, lineY, screenSize, 1);
+            rowsRemaining--;
+            if (rowsRemaining == 0)
+                enableUI(true);
+        }
     }
 }
