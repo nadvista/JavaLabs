@@ -70,10 +70,7 @@ public class Crawler implements Runnable {
             }
             in.close();
         } catch (Exception e) {
-            // System.out.println(Thread.currentThread().getName());
-            // System.out.println(e.getClass());
-            // System.out.println(inputLine);
-            // System.out.println(e.getMessage());
+            WebScanner.CrawlerError();
         }
         return urls;
     }

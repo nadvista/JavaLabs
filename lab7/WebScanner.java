@@ -2,11 +2,13 @@ import java.io.IOException;
 
 public class WebScanner {
     public static final int MAX_DEPTH = 10;
-    public static final int CRAWLERS_COUNT = 500;
+    public static final int CRAWLERS_COUNT = 1000;
 
     private static int freezedCrawlers = 0;
     private static Crawler[] allCrawlers = new Crawler[CRAWLERS_COUNT];
     private static Object locker = new Object();
+
+    private static int errors = 0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -31,6 +33,7 @@ public class WebScanner {
             System.out.println(element.getUrl());
         }
         System.out.println(checked.size());
+        System.out.println(errors);
     }
 
     private static void waitAll() throws InterruptedException {
@@ -55,6 +58,12 @@ public class WebScanner {
     public static void CrawlerUnfreezedHandler(Crawler sender) {
         synchronized (locker) {
             freezedCrawlers--;
+        }
+    }
+
+    public static void CrawlerError() {
+        synchronized (locker) {
+            errors++;
         }
     }
 }
