@@ -9,17 +9,17 @@ public class UrlsContainer {
     private static HashMap<Integer, URLDepthPair> uncheckedUrls = new HashMap<Integer, URLDepthPair>();
     private static HashMap<Integer, URLDepthPair> checkedUrls = new HashMap<Integer, URLDepthPair>();
 
-    public static int GetUncheckedSize() {
+    public static int getUncheckedSize() {
         return uncheckedUrls.size();
     };
 
-    public static Collection<URLDepthPair> GetChecked() {
+    public static Collection<URLDepthPair> getChecked() {
         return checkedUrls.values();
     }
 
     public static URLDepthPair getFreeElement() {
         synchronized (locker) {
-            if (GetUncheckedSize() == 0)
+            if (getUncheckedSize() == 0)
                 return null;
             var element = uncheckedUrls.entrySet().iterator().next().getValue();
             checkedUrls.put(element.hashCode(), element);
@@ -28,7 +28,7 @@ public class UrlsContainer {
         }
     }
 
-    public static void AddUnchecked(String url, int depth) {
+    public static void addUnchecked(String url, int depth) {
         synchronized (locker) {
             if (depth >= WebScanner.MAX_DEPTH)
                 return;
@@ -37,14 +37,9 @@ public class UrlsContainer {
         }
     }
 
-    public static void AddUnchecked(List<String> urls, int depth) {
-        synchronized (locker) {
-            for (var url : urls) {
-                if (depth >= WebScanner.MAX_DEPTH)
-                    return;
-                var pair = new URLDepthPair(url, depth);
-                uncheckedUrls.put(pair.hashCode(), pair);
-            }
+    public static void addUnchecked(List<String> urls, int depth) {
+        for (var url : urls) {
+            addUnchecked(url, depth);
         }
     }
 

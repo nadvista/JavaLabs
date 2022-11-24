@@ -9,31 +9,23 @@ public class WebScanner {
     private static Object locker = new Object();
 
     private static int errors = 0;
+    private static CrawlerEventsHandler crawlersEventsHandler = new CrawlerEventsHandler();
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
         var startUrl = "http://blog.adw.org/";
         var startDepth = 0;
-        UrlsContainer.AddUnchecked(startUrl, startDepth);
+        UrlsContainer.addUnchecked(startUrl, startDepth);
 
         var threads = new Thread[CRAWLERS_COUNT];
         for (int i = 0; i < CRAWLERS_COUNT; i++) {
-            var crawler = new Crawler();
+            var crawler = new Crawler(crawlersEventsHandler);
             var thread = new Thread(crawler);
             allCrawlers[i] = crawler;
             threads[i] = thread;
             thread.start();
         }
-
         waitAll();
-
-        // waitAllThreads(threads);
-        var checked = UrlsContainer.GetChecked();
-        for (var element : checked) {
-            System.out.println(element.getUrl());
-        }
-        System.out.println(checked.size());
-        System.out.println(errors);
     }
 
     private static void waitAll() throws InterruptedException {
@@ -55,7 +47,7 @@ public class WebScanner {
         }
     }
 
-    public static void CrawlerUnfreezedHandler(Crawler sender) {
+    public static void CrawlerResumedHandler(Crawler sender) {
         synchronized (locker) {
             freezedCrawlers--;
         }

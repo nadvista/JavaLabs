@@ -12,40 +12,48 @@ public class Crawler implements Runnable {
                                                                                                 // href\\s*=\\s*\\\"(?<url>http:\\/\\/www\\.\\S*)\\\"\\>";
     public static final String REGEX_GROUP_NAME = "url";
     private static Pattern pattern = Pattern.compile(REGEX_PATTERN);
-    private boolean freezed = false;;
-    private URLDepthPair currentPair;
     private boolean stopped = false;
+    private boolean freezed = false;
+    private ICrawlerEventsHandler eventsHandler;
 
-    public void SetUrlData(URLDepthPair data) {
-        currentPair = data;
-    }
-
-    public void Stop() {
-        stopped = true;
+    public Crawler(ICrawlerEventsHandler handler) {
+        eventsHandler = handler;
     }
 
     @Override
     public void run() {
         while (!stopped) {
 
-            currentPair = UrlsContainer.getFreeElement();
+            var currentPair = UrlsContainer.getFreeElement();
             if (currentPair == null) {
-                if (!freezed) {
-                    WebScanner.CrawlerFreezedHandler(this);
-                    freezed = true;
-                }
+                if (!isFreezed())
+                    Freese();
                 continue;
             }
+            System.out.println(String.format("%s in depth %s", currentPair.getUrl(), currentPair.getDepth()));
+            var newDepth = currentPair.getDepth() + 1;
+            var foundUrls = findUrls(currentPair.getUrl());
 
-            if (freezed) {
-                freezed = false;
-                WebScanner.CrawlerUnfreezedHandler(this);
+            for (var url : foundUrls) {
+                UrlsContainer.addUnchecked(foundUrls, newDepth);
             }
-
-            var pageUrls = findUrls(currentPair.getUrl());
-            UrlsContainer.AddUnchecked(pageUrls, currentPair.getDepth() + 1);
-            currentPair = null;
         }
+    }
+
+    public void Stop() {
+        stopped = true;
+    }
+
+    public void Resume() {
+        freezed = false;
+        if (eventsHandler != null)
+            eventsHandler.CrawlerResumed(this);
+    }
+
+    public void Freese() {
+        freezed = true;
+        if (eventsHandler != null)
+            eventsHandler.CrawlerFreezed(this);
     }
 
     public static List<String> findUrls(String startUrl) {
@@ -77,5 +85,9 @@ public class Crawler implements Runnable {
 
     public boolean isStopped() {
         return stopped;
+    }
+
+    public boolean isFreezed() {
+        return freezed;
     }
 }
