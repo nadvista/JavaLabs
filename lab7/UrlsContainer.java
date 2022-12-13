@@ -30,8 +30,6 @@ public class UrlsContainer {
 
     public static void addUnchecked(String url, int depth) {
         synchronized (locker) {
-            if (depth >= WebScanner.MAX_DEPTH)
-                return;
             var pair = new URLDepthPair(url, depth);
             uncheckedUrls.put(pair.hashCode(), pair);
         }
