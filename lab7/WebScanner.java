@@ -1,61 +1,38 @@
-import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class WebScanner {
-    public static final int MAX_DEPTH = 10;
-    public static final int CRAWLERS_COUNT = 1000;
+    public static final int MAX_DEPTH = 2;
+    public static final int CRAWLERS_COUNT = 10;
 
-    private static int freezedCrawlers = 0;
-    private static Crawler[] allCrawlers = new Crawler[CRAWLERS_COUNT];
-    private static Object locker = new Object();
-
-    private static int errors = 0;
-    private static CrawlerEventsHandler crawlersEventsHandler = new CrawlerEventsHandler();
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-
+    public static void main(String[] args) {
         var startUrl = "http://blog.adw.org/";
         var startDepth = 0;
         UrlsContainer.addUnchecked(startUrl, startDepth);
+        Run();
+        for (var pair : UrlsContainer.getChecked()) {
+            System.out.println(String.format("URL %s in depth %s", pair.getUrl(), pair.getDepth()));
 
-        var threads = new Thread[CRAWLERS_COUNT];
-        for (int i = 0; i < CRAWLERS_COUNT; i++) {
-            var crawler = new Crawler(crawlersEventsHandler);
-            var thread = new Thread(crawler);
-            allCrawlers[i] = crawler;
-            threads[i] = thread;
-            thread.start();
-        }
-        waitAll();
-    }
-
-    private static void waitAll() throws InterruptedException {
-        while (freezedCrawlers != CRAWLERS_COUNT) {
-            Thread.sleep(1);
-        }
-        stopCrawlers();
-    }
-
-    private static void stopCrawlers() {
-        for (var crawler : allCrawlers) {
-            crawler.Stop();
         }
     }
 
-    public static void CrawlerFreezedHandler(Crawler sender) {
-        synchronized (locker) {
-            freezedCrawlers++;
-        }
-    }
+    public static void Run() {
+        var executorService = Executors.newFixedThreadPool(CRAWLERS_COUNT);
+        var crawlers = new Crawler[CRAWLERS_COUNT];
+        for (var i = 0; i < CRAWLERS_COUNT; i++)
+            crawlers[i] = new Crawler(MAX_DEPTH);
 
-    public static void CrawlerResumedHandler(Crawler sender) {
-        synchronized (locker) {
-            freezedCrawlers--;
-        }
-    }
-
-    public static void CrawlerError() {
-        synchronized (locker) {
-            errors++;
+        while (UrlsContainer.getUncheckedSize() > 0) {
+            for (var crawler : crawlers) {
+                executorService.execute(crawler);
+                System.out.println("Started new crawler");
+            }
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
