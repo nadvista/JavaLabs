@@ -3,7 +3,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class WebScanner {
-    public static final int MAX_DEPTH = 5;
+    public static final int MAX_DEPTH = 10;
     public static final int CRAWLERS_COUNT = 10;
     private static ArrayList<String> _errors = new ArrayList<String>();
     public static void main(String[] args) {

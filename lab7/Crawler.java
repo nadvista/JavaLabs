@@ -4,6 +4,7 @@ public class Crawler implements Runnable {
 
     private int _maxDepth;
     private ArrayList<String> _errors = new ArrayList<String>();
+    private UrlsFinder _finder = new UrlsFinder();
 
     public Crawler(int max_depth) {
         _maxDepth = max_depth;
@@ -26,7 +27,7 @@ public class Crawler implements Runnable {
         } while (startUrlDepthPair.getDepth() >= _maxDepth);
         try
         {
-            var urls = UrlsFinder.findUrls(startUrlDepthPair.getUrl());
+            var urls = _finder.findUrls(startUrlDepthPair.getUrl());
             var newDepth = startUrlDepthPair.getDepth() + 1;
             UrlsContainer.addUnchecked(urls, newDepth);
         }
