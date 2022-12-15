@@ -6,24 +6,24 @@ import java.util.List;
 public class UrlsContainer {
     private static Object locker = new Object();
 
-    private static HashMap<Integer, URLDepthPair> uncheckedUrls = new HashMap<Integer, URLDepthPair>();
-    private static HashMap<Integer, URLDepthPair> checkedUrls = new HashMap<Integer, URLDepthPair>();
+    private static HashMap<Integer, URLDepthPair> _uncheckedUrls = new HashMap<Integer, URLDepthPair>();
+    private static ArrayList<URLDepthPair> _checkedUrls = new ArrayList<URLDepthPair>();
 
     public static int getUncheckedSize() {
-        return uncheckedUrls.size();
+        return _uncheckedUrls.size();
     };
 
-    public static Collection<URLDepthPair> getChecked() {
-        return checkedUrls.values();
+    public static ArrayList<URLDepthPair> getChecked() {
+        return _checkedUrls;
     }
 
     public static URLDepthPair getFreeElement() {
         synchronized (locker) {
             if (getUncheckedSize() == 0)
                 return null;
-            var element = uncheckedUrls.entrySet().iterator().next().getValue();
-            checkedUrls.put(element.hashCode(), element);
-            uncheckedUrls.remove(element.hashCode());
+            var element = _uncheckedUrls.entrySet().iterator().next().getValue();
+            _checkedUrls.add(element);
+            _uncheckedUrls.remove(element.hashCode());
             return element;
         }
     }
@@ -31,7 +31,7 @@ public class UrlsContainer {
     public static void addUnchecked(String url, int depth) {
         synchronized (locker) {
             var pair = new URLDepthPair(url, depth);
-            uncheckedUrls.put(pair.hashCode(), pair);
+            _uncheckedUrls.put(pair.hashCode(), pair);
         }
     }
 

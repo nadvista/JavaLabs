@@ -1,25 +1,25 @@
 public class URLDepthPair {
-    private String url;
-    private int depth;
+    private String _url;
+    private int _depth;
 
     public URLDepthPair(String url, int depth) {
-        this.url = url;
-        this.depth = depth;
+        this._url = url;
+        this._depth = depth;
     }
 
     public String getUrl() {
-        return url;
+        return _url;
     }
 
     public int getDepth() {
-        return depth;
+        return _depth;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + ((_url == null) ? 0 : _url.hashCode());
         return result;
     }
 
@@ -32,11 +32,13 @@ public class URLDepthPair {
         if (getClass() != obj.getClass())
             return false;
         URLDepthPair other = (URLDepthPair) obj;
-        if (url == null) {
-            if (other.url != null)
+        if (_url == null) {
+            if (other._url != null)
                 return false;
-        } else if (!url.equals(other.url))
+        } else if (!_url.equals(other._url))
             return false;
         return true;
     }
+
+    
 }
